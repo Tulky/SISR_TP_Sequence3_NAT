@@ -1,0 +1,139 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[francais]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{lipsum}
+
+\author{Antoine Audouin}
+
+\newcommand{\MONTITRE}{Fonctionnement d’un réseau}
+\newcommand{\MONSOUSTITRE}{Fiche 6 (Nat/Pat, Redirection)}
+\title{
+\begin{tabular}{p{3.5cm} r}
+& {\Huge {\bf \MONTITRE}}\\
+& {\huge \MONSOUSTITRE}\\
+& version du \today{}
+\end{tabular}
+}
+
+\begin{document}
+\maketitle
+\newpage
+\tableofcontents
+\newpage
+
+\section{CAHIER DES CHARGES}
+\begin{itemize}
+\item Seuls le serveur Web et le serveur de messagerie seront accessibles depuis l’Internet, sans restriction particulière
+\bigbreak
+\item La nécessité d’une politique de sécurité différente pour ces serveurs a conduit au découpage du réseau en deux zones et donc deux réseaux logiques distincts.
+\bigbreak
+\item La zone accessible à partir d’Internet est généralement appelée DMZ pour « Zone démilitarisée » (autrement dit plus accessible ou moins protégée).
+\bigbreak
+\item La zone plus protégée (le réseau local ou LAN) est séparée de la DMZ par un routeur qui sera également capable de filtrer.
+\bigbreak
+\item Chaque zone est dotée de son propre switch ici, mais certaines entreprises mettent en place des VLANs (réseaux virtuels) sur un même équipement pour isoler les flux.
+\bigbreak
+\item Le réseau de la DMZ est en 172.16.0.0 (adresse privée) tandis que le réseau LAN est en 192.168.1.0 (adresse privée également).
+\bigbreak
+\item Dans la DMZ, le serveur WEB écoute sur le port « bien connu » 80 du protocole de transport TCP. Le serveur de messagerie écoute lui sur le port 25 du protocole TCP.
+\bigbreak
+\item Un serveur est également installé dans le réseau local et écoute sur le port 5000.
+\bigbreak
+\item Le routeur contrôlera les accès aux deux réseaux et aux différents serveurs, c’est pourquoi il dispose de 3 interfaces actives : une sur le LAN, une autre sur le DMZ, la troisième (carte d’accès distant) sur Internet.
+\bigbreak
+\item Le réseau de l’entreprise « PARTNER » est un réseau public (200.100.40.0) mais qui souhaite masquer ses adresses lorsqu’il communique sur Internet.
+\bigbreak
+\item Le dernier réseau est un réseau complètement indépendant, qui nous permettra de réaliser des tests. L’entreprise « 7-EXTRA » qui possède de réseau utilise un adressage privé en 10.0.0.0.
+\bigbreak
+\item Il se trouve que les entreprises « PARTNER » et « 7-EXTRA » ont le même fournisseur d’accès, mais cela n’a aucune incidence particulière.
+\bigbreak
+\item L’entreprise « PARTNER » a donc des relations privilégiées avec l’entreprise « LANIMAN » : elle doit pouvoir accéder au serveur présent dans son réseau local.	
+NB : Ce serveur est nommé « Srv LANO » sur le schéma.
+\bigbreak
+\item Le réseau de « 7-EXTRA », en revanche, ne devra accéder qu’aux serveurs de la DMZ, comme n’importe quelle autre entreprise étrangère aux activités de « LANIMAN ». Les serveurs de la DMZ ont tous une adresse en 172.16.21.X.
+
+\end{itemize}
+\subsubsection{Mise en place du réseau physique}
+\begin{itemize}
+\item Respecter strictement l’agencement « géographique » pour faciliter le débogage du professeur en cas de besoin.
+\bigbreak
+\item Placer un routeur type ADSL (avec une carte d’accès distant reliée à Internet via un câble télécom) pour chacun des trois sites : LANIMAN, PARTNER, 7-EXTRA.
+\bigbreak
+\item Placer un switch pour chaque réseau IP et le relier au routeur adéquat. Sur le site de LANIMAN, les deux switchs (LAN et DMZ) seront connectés au même routeur.
+\bigbreak
+\item Placer deux postes sur chaque réseau logique (réseau IP)
+\bigbreak
+\item Nommer les actifs (routeurs et switchs) comme indiqué ci-dessous pour faciliter le repérage : « sw XXXX » et « RT-XXXX »
+\bigbreak
+\item Nommer les postes (serveurs et stations) comme ci-dessous également : « Srv XXX » pour les serveurs, « M. XXXX » ou « Mme XXX » pour les stations de travail.
+\end{itemize}
+\bigbreak
+\center
+\includegraphics[width=13cm]{../Pictures/Image_latex/Schema_maquette_NAT.png} 
+\endcenter
+\newpage
+\subsubsection{Mise en place de la configuration IP}
+
+\begin{itemize}
+\item Configurer pour chaque poste l’adresse de passerelle adéquate lui permettant l’accès à Internet.
+\bigbreak
+\item Tout poste doit disposer d’une adresse de passerelle
+\bigbreak
+\item Tout routeur connecté à Internet doit avoir une route par défaut permettant de joindre les postes reliés Internet, et donc ceux connectés à l’autre FAI (puisqu’Internet est simulé par 2 FAI).
+\end{itemize}
+\bigbreak
+\textbf{NOTE :} 
+\bigbreak
+\begin{itemize}
+\item RT-FW est directement connecté à 3 réseaux (deux réseaux privés + Internet). Il faut lui rajouter une route par défaut utilisant comme passerelle le point de connexion à Internet de son FAI.
+\newline
+ NB : Le point de connexion n’est rien d’autre qu’un autre routeur en fait, mais appartenant au FAI.
+\bigbreak
+\item RT-DIST est directement connecté à 2 réseaux. Il faut de la même manière lui ajouter une route par défaut
+\bigbreak
+\item RT-EXT est directement connecté à 2 réseaux (un réseau privé et Internet). Il faut de la même manière lui ajouter une route par défaut
+\end{itemize}
+\newpage
+\section{Accès à Internet pour les postes du réseau 10.0.0.0}
+\begin{itemize}
+\bigbreak
+\item Ajouter un poste que vous nommerez « www.gogol »
+\bigbreak
+\item Ajouter à ce poste une carte d’accès distant et la relier directement à Internet sur le dernier point libre, via un câble Télécom.
+\bigbreak
+\item Installer un serveur web sur ce poste (il faut passer en mode Application pour ajouter un logiciel serveur sur un poste, ici HTTP)
+\end{itemize}
+
+\subsection{Questions}
+\bigbreak
+Le message parvient-il à www.gogol ?
+
+\bigbreak
+\textbf{Le message ne parvient pas à www.gogol. Le message d'erreur est le suivant :}
+\bigbreak
+\includegraphics[width=7cm]{../Pictures/Image_latex/Message_erreur.png} 
+\bigbreak
+La réponse part-elle de www.gogol ?
+\medbreak
+\textbf{La réponse provient du routeur, qui possède la MAC 27.}
+\medbreak
+\includegraphics[width=15cm]{../Pictures/Image_latex/reponse_routeur.PNG} 
+\bigbreak
+Parvient-elle au poste de Mme Extin ?
+\medbreak
+\textbf{\lipsum}
+\bigbreak
+Si la réponse ne part pas du serveur HTTP, c’est que vous avez oublié d’indiquer une passerelle par défaut pour ce serveur.
+\medbreak
+\textit{La passerelle par défaut c’est le routeur qui lui donne accès au « reste du monde », à savoir le routeur de son FAI qui a pour adresse : 172.11.0.2}
+\bigbreak
+Retentons une communication après configuration de la passerelle :
+\medbreak
+La réponse part-elle de www.gogol ?
+
+
+\end{document}
